@@ -56,12 +56,12 @@ class GraphPartition(object):
           Graph to which the partition index refers to.
 
         index : dict
-          A dict of sets that maps module/partition labels to sets of 
+          A dict of sets that maps module/partition labels to sets of
           nodes, this describes the partition in full.
 
         Note
         ----
-        The values in the index dict MUST be real sets, not lists. 
+        The values in the index dict MUST be real sets, not lists.
         """
         # Store references to the original graph and label dict
         if not type(index) == type({}):
@@ -72,9 +72,10 @@ class GraphPartition(object):
         ## add quick check to make sure the passed index is
         ## a dict of sets
         self._check_index_contains_sets()
-       
+
         # We'll need the graph's adjacency matrix often, so store it once
-        self.graph_adj_matrix = nx.adj_matrix(graph).todense() # Must convert to dense matrix before making into a numpy array (line was previously: self.graph_adj_matrix = nx.adj_matrix(graph))
+        self.graph_adj_matrix = nx.adj_matrix(graph)
+
         #make sure adj_matrix is binary otherwise raise exception
         if not self.graph_adj_matrix.sum() == \
                 self.graph_adj_matrix.astype(bool).sum():
@@ -100,7 +101,7 @@ class GraphPartition(object):
         self._node_names = graph.nodes()
         ## raise useful error if index is missing nodes in graph
         self._check_allnodes_in_index()
- 
+
         # Now, build the edge information used in modularity computations
         self.mod_e, self.mod_a = self._edge_info()
 
@@ -196,7 +197,7 @@ class GraphPartition(object):
 
         Returns
         -------
-            merged_module : set of merged nodes 
+            merged_module : set of merged nodes
             e1[0] : element of e vector for merged module
             a1[0] : element of a vector for merged module
             -delta_q : change in modularity induced by this change
@@ -205,7 +206,7 @@ class GraphPartition(object):
             m2 : index of the second merged module
             m2 : index of the second merged module
           """
-          
+
         # Below, we want to know that m1<m2, so we enforce that:
         if m1>m2:
             m1, m2 = m2, m1
@@ -287,13 +288,13 @@ class GraphPartition(object):
 
         Returns
         -------
-        
+
           The change in modularity resulting from the change
           (Q_final-Q_initial)"""
 
         # FIXME : docstring is wrong (the partition is modified in-place), and
         # we shouldn't be returning split_modules at all from this.
-          
+
         # create a dict that contains the new modules 0 and 1 that have the
         # sets n1 and n2 of nodes from module m.
         split_modules = {0: n1, 1: n2}
@@ -516,7 +517,7 @@ class GraphPartition(object):
         num_mods=len(self)
 
 
-        # Make a random choice bounded between 0 and 1, 
+        # Make a random choice bounded between 0 and 1,
         #   less than 0.5 means we will split the modules
         #   greater than 0.5 means we will merge the modules.
 
@@ -620,13 +621,13 @@ class GraphPartition(object):
 
     def index_as_node_names(self):
         """ index by default contains references to integers represented the
-        nodes as indexed in the adjacency matrix defined in the original graph. 
+        nodes as indexed in the adjacency matrix defined in the original graph.
         This will return the index (partition) using the graph node names"""
         named_part = []
         for nmod, part in self.index.iteritems():
             named_part.append( [self._node_names[x] for x in part] )
         return named_part
-            
+
     def check_integrity(self, partition):
         """ Raises error if partition structure contains
         empty partitions or Nan values"""
@@ -636,7 +637,7 @@ class GraphPartition(object):
                 raise ValueError("Partition has empty key : %s"%partition)
             if any([np.isnan(x) for x in tmpset]):
                 raise ValueError("Partition contains NaN value(s)")
-            
+
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -1271,14 +1272,14 @@ def simulated_annealing(g, p0=None, temperature = 50, temp_scaling = 0.995, tmin
 
         if np.abs(finalmodval - (-energy_best)) > 0.000001: #to account for float error
             raise ValueError('mismatch in energy and modularity')
-        
+
 
         return graph_part_final, graph_part_final.modularity()
 
 
 def modularity_matrix(g):
     """Modularity matrix of the graph.
-    
+
     Parameters
     ----------
     g : NetworkX graph
@@ -1288,9 +1289,9 @@ def modularity_matrix(g):
     -------
     B : numpy array
         modularity matrix (graph laplacian)
-    
+
     """
-    A = np.asarray(nx.adjacency_matrix(g).todense()) # Must convert to dense matrix before making into a numpy array (line was previously: A = np.asarray(nx.adjacency_matrix(g)))
+    A = np.asarray(nx.adjacency_matrix(g))
     k = np.sum(A, axis=0) #vertex degree
     M = np.sum(k) # 2x number of edges
 
@@ -1314,7 +1315,7 @@ def newman_partition(g, max_div=np.inf):
         Estimated optimal partitioning.
 
     """
-    A = np.asarray(nx.adjacency_matrix(g).todense()) # Must convert to dense matrix before making into a numpy array (line was previously:(A = np.asarray(nx.adjacency_matrix(g)))
+    A = np.asarray(nx.adjacency_matrix(g))
     if not A.sum() == A.astype(bool).sum():
         raise ValueError('Adjacency matrix is weighted, need binary matrix')
     ## add line to binarize adj_matrix if not binary
@@ -1338,7 +1339,7 @@ def newman_partition(g, max_div=np.inf):
         Returns
         -------
         out : list of ints
-            Partitioning of node labels. 
+            Partitioning of node labels.
         """
         p = np.asarray(p)
 
